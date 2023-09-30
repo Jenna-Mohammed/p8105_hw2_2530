@@ -1,0 +1,34 @@
+---
+title: "p8105_hw2_2530"
+author: "Jenna Mohammed"
+date: '2023-09-28'
+output: github_document
+---
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+```
+
+Problem #1
+
+```{r}
+litters_data = read_csv(file = "./data/FAS_litters.csv")
+
+pols_df = read_csv(file = "
+  haven::read_csv("C:/Users/jenna/OneDrive/Documents/R/Data Science/Homework 2/p8105_hw2_2530/fivethirtyeight_datasets.zip/fivethirtyeight_datasets/pols-moth.csv") 
+  janitor::clean_names(pols_df)
+
+view(pols_df)
+
+print(pols_df)
+
+```
+
+Problem #2
+
+```{r}
+dpois(3.6.5)
+```
+
