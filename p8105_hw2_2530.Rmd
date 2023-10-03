@@ -9,26 +9,159 @@ output: github_document
 library(dplyr)
 library(tidyr)
 library(tidyverse)
+library(readxl)
 ```
 
-Problem #1
+## Problem #1
+
+Problem 1.1
 
 ```{r}
-litters_data = read_csv(file = "./data/FAS_litters.csv")
+month_df = 
+  tibble(
+    month_num = 1:12,
+    month_abb = month.abb,
+    month = month.name
+  )
 
-pols_df = read_csv(file = "
-  haven::read_csv("C:/Users/jenna/OneDrive/Documents/R/Data Science/Homework 2/p8105_hw2_2530/fivethirtyeight_datasets.zip/fivethirtyeight_datasets/pols-moth.csv") 
-  janitor::clean_names(pols_df)
+pols_df = read_csv("./fivethirtyeight_datasets/fivethirtyeight_datasets/pols-month.csv") %>%
+  janitor::clean_names() %>%
+  separate(mon, into = c("year", "month", "day"),sep = "-") %>%
+  mutate(
+    president = recode(prez_gop, "0" = "dem", "1" = "gop", "2" = "gop")) |>
+  select(-prez_dem, -prez_gop, -day)
+    
+    #year, month, everything(), -day, -starts_with("prez")) |> 
+  #left_join(x = _, y = month_df)
 
-view(pols_df)
+snp = 
+  read_csv("./fivethirtyeight_datasets/fivethirtyeight_datasets/snp.csv") |>
+  separate(date, into = c("month", "day", "year"), convert = TRUE) |>
+  arrange(year, month) |>
+  mutate(month = month.name[month]) |>
+  select(year, month, close) 
 
-print(pols_df)
+unemployment = 
+  read_csv("./fivethirtyeight_datasets/fivethirtyeight_datasets/unemployment.csv") |>
+  rename(year = Year) |>
+  pivot_longer(
+    Jan:Dec, 
+    names_to = "month_abb",
+    values_to = "unemployment"
+  ) 
+  
+
+# error in select function
+
 
 ```
 
-Problem #2
+
+
+##Problem #2
 
 ```{r}
-dpois(3.6.5)
+
+
+
+
+# Mr Trash Wheel
+
+mtw_sheet = read_excel("./mtw_data.xlsx",
+  sheet = "Mr. Trash Wheel",
+  skip = 1) |>
+  janitor::clean_names() |>
+  drop_na(dumpster) |>
+    mutate(
+      homes_powered = (weight_tons * 500)/30
+    )
+  
+# Professor Trash Wheel
+ptw_sheet = read_excel("./mtw_data.xlsx",
+  sheet = "Professor Trash Wheel", 
+  skip = 1) |>
+  janitor::clean_names() |>
+  drop_na(dumpster) |>
+    mutate(
+      homes_powered = (weight_tons * 500)/30
+    )
+                       
+
+print(ptw_sheet)
+
+# Captain Trash Wheel
+
+ctw_sheet = read_excel("./mtw_data.xlsx",
+  sheet = "Captain Trash Wheel",
+  skip = 1) |>
+  janitor::clean_names()|>
+  drop_na(dumpster) |>
+    mutate(
+      homes_powered = (weight_tons * 500)/30
+    )
+
+print(ctw_sheet)
+
+# Gwynnda Trash Wheel
+
+gtw_sheet = read_excel("./mtw_data.xlsx",
+  sheet = "Gwynnda Trash Wheel", 
+  skip = 1) |>
+  janitor::clean_names() |>
+  drop_na(dumpster) |>
+    mutate(
+      homes_powered = (weight_tons * 500)/30
+    )
+
+print(gtw_sheet)
+```
+
+Combining datasets
+
+```{r}
+total_data = 
+  bind_rows(ptw_sheet, gtw_sheet, ctw_sheet)
+
+print(total_data) 
+      
+#bind_rows to group them
+```
+
+## Problem 3 
+
+
+```{r}
+
+# Ensure that sex and APOE4 carrier status are appropriate encoded
+
+mci_df = read_csv("./data_mci./data_mci/MCI_baseline.csv", skip = 1) |>
+  janitor::clean_names()|>
+  mutate(
+    sex = 
+      case_match(
+        sex, 
+        1 ~ "male", 
+        0 ~ "female"),
+    sex = as.factor(sex)) |>
+  mutate(
+    apoe4 = 
+      case_match(
+        apoe4, 
+        1 ~ "carrier", 
+        0 ~ "non-carier"),
+    apoe4 = as.factor(apoe4)) |>
+    
+# remove any participants who do not meet the stated inclusion criteria 
+
+filter(age_at_onset == "."| age_at_onset > current_age)
+    # current_age not found
+
+```
+
+```{r, longitudinally observed data}
+
+mci_amyloid_df = read_csv("./data_mci./data_mci/mci_amyloid.csv", skip = 1) |>
+  janitor::clean_names()|>
+  mutate()
 ```
 
