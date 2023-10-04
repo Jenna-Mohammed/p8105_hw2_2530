@@ -1,11 +1,11 @@
 ---
 title: "p8105_hw2_2530"
 author: "Jenna Mohammed"
-date: '2023-09-28'
+date: '2023-10-04'
 output: github_document
 ---
 
-```{r}
+```{r warning=FALSE}
 library(dplyr)
 library(tidyr)
 library(tidyverse)
@@ -14,7 +14,6 @@ library(readxl)
 
 ## Problem #1
 
-Problem 1.1
 
 ```{r}
 month_df = 
@@ -50,24 +49,17 @@ unemployment =
     values_to = "unemployment"
   ) 
   
-
-# error in select function
-
-
 ```
 
+## Problem #2
 
-
-##Problem #2
+Read in each sheet from the trash wheel dataset. Clean each sheet by using the janitor function and removing unnecessary rows. Use the mutate function to create a new variable to determine the amount of homes that are powered by the trash found in each trash wheel.
 
 ```{r}
 
-
-
-
 # Mr Trash Wheel
 
-mtw_sheet = read_excel("./mtw_data.xlsx",
+mtw_sheet = read_excel("./trashwheel_data.xlsx",
   sheet = "Mr. Trash Wheel",
   skip = 1) |>
   janitor::clean_names() |>
@@ -77,7 +69,7 @@ mtw_sheet = read_excel("./mtw_data.xlsx",
     )
   
 # Professor Trash Wheel
-ptw_sheet = read_excel("./mtw_data.xlsx",
+ptw_sheet = read_excel("./trashwheel_data.xlsx",
   sheet = "Professor Trash Wheel", 
   skip = 1) |>
   janitor::clean_names() |>
@@ -86,12 +78,11 @@ ptw_sheet = read_excel("./mtw_data.xlsx",
       homes_powered = (weight_tons * 500)/30
     )
                        
-
 print(ptw_sheet)
 
 # Captain Trash Wheel
 
-ctw_sheet = read_excel("./mtw_data.xlsx",
+ctw_sheet = read_excel("./trashwheel_data.xlsx",
   sheet = "Captain Trash Wheel",
   skip = 1) |>
   janitor::clean_names()|>
@@ -104,7 +95,7 @@ print(ctw_sheet)
 
 # Gwynnda Trash Wheel
 
-gtw_sheet = read_excel("./mtw_data.xlsx",
+gtw_sheet = read_excel("./trashwheel_data.xlsx",
   sheet = "Gwynnda Trash Wheel", 
   skip = 1) |>
   janitor::clean_names() |>
@@ -116,25 +107,36 @@ gtw_sheet = read_excel("./mtw_data.xlsx",
 print(gtw_sheet)
 ```
 
-Combining datasets
+Combining the three datasets
 
 ```{r}
-total_data = 
+total_tw_data = 
   bind_rows(ptw_sheet, gtw_sheet, ctw_sheet)
 
-print(total_data) 
+print(total_tw_data) 
       
-#bind_rows to group them
 ```
+
+Description: After combining the three datasets, there are 289 observations and 13 variables. Some Key variables are the weight and volume collected, homes powered, and the different types of trash collected. Professor Trash Wheel collected 216.126 tons of of trash. In July 2021, Gwynnda collected 16300 cigarette butts.
+
+The `Mr. Trash Wheel Sheet` has `r nrow(mtw_sheet)` observations and `r ncol(mtw_sheet)` columns
+
+The `Professor Trash Wheel` Sheet has `r nrow(ptw_sheet)` observations and `r ncol(ptw_sheet)` columns
+
+The `Gwynnda Trash Wheel` Sheet has `r nrow(gtw_sheet)` observations and `r ncol(gtw_sheet)` columns
+
+The Combined trash wheel data has `r nrow(total_tw_data)` observations and `r ncol(total_tw_data)` columns
+
 
 ## Problem 3 
 
+Loading in MCI Baseline data and cleaning by removing ineligible participants. Using the mutate function to change the numerical values to categorical ones.
 
 ```{r}
 
-# Ensure that sex and APOE4 carrier status are appropriate encoded
+# Changing sex and APOE4 carrier status from numerical to categorical
 
-mci_df = read_csv("./data_mci./data_mci/MCI_baseline.csv", skip = 1) |>
+mci_baseline_df = read_csv("./data_mci./data_mci/MCI_baseline.csv", skip = 1) |>
   janitor::clean_names()|>
   mutate(
     sex = 
@@ -154,9 +156,30 @@ mci_df = read_csv("./data_mci./data_mci/MCI_baseline.csv", skip = 1) |>
 # remove any participants who do not meet the stated inclusion criteria 
 
 filter(age_at_onset == "."| age_at_onset > current_age)
-    # current_age not found
 
 ```
+
+Finding the mean baseline age
+
+```{r}
+mean(mci_baseline_df$current_age)
+```
+
+Determining the proportion of women in the study that are APOE4 carriers
+
+```{r}
+data_female = filter(mci_baseline_df, sex == "female")
+nrow(data_female)
+
+data_female_carrier = filter(data_female, apoe4 == "carrier")
+nrow(data_female_carrier)
+```
+
+MCI Baseline description: There are 479 participants in this dataset, and from that ____ developed MCI. The average baseline age is 65.03. The proportion of women in the study that are APOE4 carriers is 63/479.
+
+
+
+Loading in and cleaning MCI Longtitudinal data by using the janitor function.
 
 ```{r, longitudinally observed data}
 
@@ -164,4 +187,24 @@ mci_amyloid_df = read_csv("./data_mci./data_mci/mci_amyloid.csv", skip = 1) |>
   janitor::clean_names()|>
   mutate()
 ```
+
+Combining demographic and biomarker datasets
+
+```{r}
+
+colnames(mci_amyloid_df)[colnames(mci_amyloid_df) == "study_id"] = "id"
+
+mci_combined_df = full_join(mci_baseline_df, mci_amyloid_df, by = c("id"))
+
+view(mci_combined_df)
+```
+
+
+To ask TA:
+
+- how to get rid of warnings when knitting
+
+Problem 3
+- how to find how many people developed MCI - nrow, _antijoin
+- export result to CSV 
 
