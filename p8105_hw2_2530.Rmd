@@ -1,11 +1,11 @@
 ---
-title: "p8105_hw2_2530"
+title: "P8105 Homework 2"
 author: "Jenna Mohammed"
 date: '2023-10-04'
 output: github_document
 ---
 
-```{r warning=FALSE}
+```{r setup, message=FALSE}
 library(dplyr)
 library(tidyr)
 library(tidyverse)
@@ -30,9 +30,7 @@ pols_df = read_csv("./fivethirtyeight_datasets/fivethirtyeight_datasets/pols-mon
     president = recode(prez_gop, "0" = "dem", "1" = "gop", "2" = "gop")) |>
   select(-prez_dem, -prez_gop, -day)
     
-    #year, month, everything(), -day, -starts_with("prez")) |> 
-  #left_join(x = _, y = month_df)
-
+   
 snp = 
   read_csv("./fivethirtyeight_datasets/fivethirtyeight_datasets/snp.csv") |>
   separate(date, into = c("month", "day", "year"), convert = TRUE) |>
@@ -53,9 +51,9 @@ unemployment =
 
 ## Problem #2
 
-Read in each sheet from the trash wheel dataset. Clean each sheet by using the janitor function and removing unnecessary rows. Use the mutate function to create a new variable to determine the amount of homes that are powered by the trash found in each trash wheel.
+#### Read in each sheet from the trash wheel dataset. Clean each sheet by using the janitor function and removing unnecessary rows. Use the mutate function to create a new variable to determine the amount of homes that are powered by the trash found in each trash wheel.
 
-```{r}
+```{r trash wheel}
 
 # Mr Trash Wheel
 
@@ -107,9 +105,9 @@ gtw_sheet = read_excel("./trashwheel_data.xlsx",
 print(gtw_sheet)
 ```
 
-Combining the three datasets
+#### Combining the three datasets
 
-```{r}
+```{r combining trash wheel data}
 total_tw_data = 
   bind_rows(ptw_sheet, gtw_sheet, ctw_sheet)
 
@@ -130,9 +128,9 @@ The Combined trash wheel data has `r nrow(total_tw_data)` observations and `r nc
 
 ## Problem 3 
 
-Loading in MCI Baseline data and cleaning by removing ineligible participants. Using the mutate function to change the numerical values to categorical ones.
+#### Loading in MCI Baseline data and cleaning by removing ineligible participants. Using the mutate function to change the numerical values to categorical ones.
 
-```{r}
+```{r mci baseline}
 
 # Changing sex and APOE4 carrier status from numerical to categorical
 
@@ -159,15 +157,15 @@ filter(age_at_onset == "."| age_at_onset > current_age)
 
 ```
 
-Finding the mean baseline age
+#### Finding the mean baseline age
 
-```{r}
+```{r mci baseline mean}
 mean(mci_baseline_df$current_age)
 ```
 
-Determining the proportion of women in the study that are APOE4 carriers
+#### Determining the proportion of women in the study that are APOE4 carriers
 
-```{r}
+```{r mci baseline female carrier}
 data_female = filter(mci_baseline_df, sex == "female")
 nrow(data_female)
 
@@ -175,11 +173,21 @@ data_female_carrier = filter(data_female, apoe4 == "carrier")
 nrow(data_female_carrier)
 ```
 
-MCI Baseline description: There are 479 participants in this dataset, and from that ____ developed MCI. The average baseline age is 65.03. The proportion of women in the study that are APOE4 carriers is 63/479.
+#### Determining how many participants developed MCI
+
+```{r}
+
+filter(mci_baseline_df, age_at_onset !=".") |> nrow()
+```
+
+
+MCI Baseline description: Important steps of this section were removing the first row of the data to ensure the variables would be read properly. Another is changing the sex and apoe4 variables from numeric to categorical using the mutate function.
+
+There are 479 participants in this dataset, and from that, 93 of them developed MCI. The average baseline age is 65.03 . The proportion of women in the study that are APOE4 carriers is 63/479.
 
 
 
-Loading in and cleaning MCI Longtitudinal data by using the janitor function.
+#### Loading in and cleaning MCI Longtitudinal data by using the janitor function.
 
 ```{r, longitudinally observed data}
 
@@ -188,7 +196,7 @@ mci_amyloid_df = read_csv("./data_mci./data_mci/mci_amyloid.csv", skip = 1) |>
   mutate()
 ```
 
-Combining demographic and biomarker datasets
+#### Combining demographic and biomarker datasets
 
 ```{r}
 
@@ -199,12 +207,11 @@ mci_combined_df = full_join(mci_baseline_df, mci_amyloid_df, by = c("id"))
 view(mci_combined_df)
 ```
 
+MCI Longtitudal Description: An important apsect of this section was removing the first row of the data to ensure the variables would be read properly. Secondly, when joining the amyloid data and the longtitudal data, we needed to change the column `study_id` to `id`. 
 
-To ask TA:
+#### Exporting the combined dataset as a csv file
 
-- how to get rid of warnings when knitting
-
-Problem 3
-- how to find how many people developed MCI - nrow, _antijoin
-- export result to CSV 
+```{r save csv}
+write.csv(mci_combined_df, "./Combined_MCI.csv")
+```
 
